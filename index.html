@@ -295,6 +295,9 @@
       -moz-user-select: none;
       -ms-user-select: none;
     }
+
+
+
 </style>
 </head>
 <body>
@@ -333,48 +336,63 @@ Lần lượt: Chọn ⚙️; Copy danh sách học sinh của bạn vào; chọ
 </div>
 
 <script>
-const believeKey = "believeCount";
-const notBelieveKey = "notBelieveCount";
+(function () {
+  const believeKey = "believeCount";
+  const notBelieveKey = "notBelieveCount";
+  const votedKey = "surveyVoted";
 
-function getCount(key) {
-    return parseInt(localStorage.getItem(key)) || 0;
-}
+  const btnBelieve = document.getElementById("btnBelieve");
+  const btnNotBelieve = document.getElementById("btnNotBelieve");
+  const resultBox = document.getElementById("result");
 
-function setCount(key, value) {
-    localStorage.setItem(key, value);
-}
+  if (!btnBelieve || !btnNotBelieve || !resultBox) return;
 
-function updateResult() {
-    const believe = getCount(believeKey);
-    const notBelieve = getCount(notBelieveKey);
-    const total = believe + notBelieve;
+  function getCount(key) {
+    return Number(localStorage.getItem(key)) || 0;
+  }
 
-    let believePercent = 0;
-    let notBelievePercent = 0;
+  function setCount(key, val) {
+    localStorage.setItem(key, val);
+  }
 
+  function updateResult() {
+    const b = getCount(believeKey);
+    const n = getCount(notBelieveKey);
+    const total = b + n;
+
+    let bp = 0, np = 0;
     if (total > 0) {
-        believePercent = Math.round(believe * 100 / total);
-        notBelievePercent = 100 - believePercent;
+      bp = Math.round(b * 100 / total);
+      np = 100 - bp;
     }
 
-    document.getElementById("result").innerHTML =
-        `Tin: ${believePercent}% &nbsp;|&nbsp; Không tin: ${notBelievePercent}%`;
+    resultBox.innerHTML =
+      `Tin: ${bp}% | Không tin: ${np}%<br><small>(${total} lượt tham gia)</small>`;
 
-  
-}
+    if (localStorage.getItem(votedKey)) {
+      btnBelieve.disabled = true;
+      btnNotBelieve.disabled = true;
+      btnBelieve.style.opacity = 0.6;
+      btnNotBelieve.style.opacity = 0.6;
+    }
+  }
 
-document.getElementById("btnBelieve").onclick = () => {
+  btnBelieve.addEventListener("click", function () {
+    if (localStorage.getItem(votedKey)) return;
     setCount(believeKey, getCount(believeKey) + 1);
+    localStorage.setItem(votedKey, "1");
     updateResult();
-};
+  });
 
-document.getElementById("btnNotBelieve").onclick = () => {
+  btnNotBelieve.addEventListener("click", function () {
+    if (localStorage.getItem(votedKey)) return;
     setCount(notBelieveKey, getCount(notBelieveKey) + 1);
+    localStorage.setItem(votedKey, "1");
     updateResult();
-};
+  });
 
-// Cập nhật khi load trang
-updateResult();
+  updateResult();
+})();
 </script>
 
 
